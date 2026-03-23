@@ -1,6 +1,6 @@
 {
   "name": "@screenpipe-installer/darwin-arm64",
-  "version": "0.3.196",
+  "version": "2.2.228",
   "description": "macOS arm64 Screenpipe binary installer.",
   "main": "index.js",
   "files": [
@@ -19,9 +19,9 @@
     "arm64"
   ],
   "screenpipe": {
-    "version": "0.3.196",
-    "url": "https://boom-alpha-mp4.s3.us-east-1.amazonaws.com/screenpipe/v0.3.196/darwin-arm64/screenpipe.tar.gz",
-    "sha256": "4dba71293704bf09d4d392b3259e5c0664413eab02dcd0875d8f000b0e8fc2ec",
+    "version": "2.2.228",
+    "url": "https://boom-alpha-mp4.s3.us-east-1.amazonaws.com/screenpipe/v2.2.228/darwin-arm64/screenpipe.tar.gz",
+    "sha256": "720ae32809e2aced92c8c0f03a2b1d244fd984834f51c13fb0da679b3ee96556",
     "archiveType": "tar.gz",
     "binaryName": "screenpipe"
   },

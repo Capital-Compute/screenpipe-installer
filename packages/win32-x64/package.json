@@ -1,6 +1,6 @@
 {
   "name": "@screenpipe-installer/win32-x64",
-  "version": "0.3.196",
+  "version": "2.2.228",
   "description": "Windows x64 Screenpipe binary installer.",
   "main": "index.js",
   "files": [
@@ -19,8 +19,8 @@
     "x64"
   ],
   "screenpipe": {
-    "version": "0.3.196",
-    "url": "https://boom-alpha-mp4.s3.us-east-1.amazonaws.com/screenpipe/v0.3.196/win32-x64/screenpipe.zip",
+    "version": "2.2.228",
+    "url": "https://boom-alpha-mp4.s3.us-east-1.amazonaws.com/screenpipe/v2.2.228/win32-x64/screenpipe.zip",
     "sha256": "086f35234e3b32cf4ab990a6b876a7419cdbd95343dc6d355c060b3a193fd846",
     "archiveType": "zip",
     "binaryName": "screenpipe.exe"
