@@ -1,0 +1,39 @@
+{
+  "name": "@screenpipe-installer/darwin-arm64",
+  "version": "0.3.196",
+  "description": "macOS arm64 Screenpipe binary installer.",
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "postinstall.js",
+    "lib",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  },
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "screenpipe": {
+    "version": "0.3.196",
+    "url": "https://boom-alpha-mp4.s3.us-east-1.amazonaws.com/screenpipe/v0.3.196/darwin-arm64/screenpipe.tar.gz",
+    "sha256": "4dba71293704bf09d4d392b3259e5c0664413eab02dcd0875d8f000b0e8fc2ec",
+    "archiveType": "tar.gz",
+    "binaryName": "screenpipe"
+  },
+  "keywords": [
+    "screenpipe",
+    "binary",
+    "darwin",
+    "arm64"
+  ],
+  "license": "ISC",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public"
+  }
+}

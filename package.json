@@ -1,0 +1,21 @@
+{
+  "name": "screenpipe-installer-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Workspace for the @screenpipe-installer npm package family.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "pack:all": "node scripts/pack-all.js",
+    "test": "node --test",
+    "sync-platform-metadata": "node scripts/sync-platform-metadata.js"
+  },
+  "keywords": [
+    "screenpipe",
+    "installer",
+    "electron"
+  ],
+  "license": "ISC",
+  "type": "commonjs"
+}

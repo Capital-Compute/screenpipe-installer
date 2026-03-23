@@ -1,0 +1,28 @@
+{
+  "name": "@screenpipe-installer/screenpipe",
+  "version": "0.3.196",
+  "description": "Platform independent binary installer for Screenpipe.",
+  "main": "index.js",
+  "types": "types/index.d.ts",
+  "files": [
+    "index.js",
+    "lib",
+    "types",
+    "README.md"
+  ],
+  "optionalDependencies": {
+    "@screenpipe-installer/darwin-arm64": "0.3.196",
+    "@screenpipe-installer/win32-x64": "0.3.196"
+  },
+  "keywords": [
+    "screenpipe",
+    "installer",
+    "binary",
+    "electron"
+  ],
+  "license": "ISC",
+  "type": "commonjs",
+  "publishConfig": {
+    "access": "public"
+  }
+}
