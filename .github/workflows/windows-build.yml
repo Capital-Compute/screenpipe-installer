@@ -16,21 +16,32 @@ jobs:
       - name: Clone screenpipe repo
         run: git clone https://github.com/screenpipe/screenpipe.git
 
-      - name: Install Rust + GNU target
+      - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          targets: x86_64-pc-windows-gnu
           profile: minimal
           override: true
 
+      - name: Add Windows GNU Rust target
+        run: rustup target add x86_64-pc-windows-gnu
+
       - name: Install MinGW-w64
+        shell: cmd
         run: |
           choco install mingw -y
           refreshenv
-        shell: cmd
 
-      - name: Build screenpipe
+      - name: Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            screenpipe/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build screenpipe for Windows GNU
         shell: cmd
         run: |
           cd screenpipe
