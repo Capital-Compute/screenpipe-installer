@@ -34,7 +34,7 @@ jobs:
 
       - name: Setup MSVC environment
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          & 'C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat' x64
 
       - name: Build screenpipe
         run: |
