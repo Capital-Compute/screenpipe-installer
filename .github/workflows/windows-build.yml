@@ -1,0 +1,35 @@
+name: Build Windows screenpipe Binary
+
+on:
+  workflow_dispatch:  # manual trigger
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout workflow repo
+        uses: actions/checkout@v3
+
+      - name: Clone screenpipe repo
+        run: git clone https://github.com/screenpipe/screenpipe.git
+
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+
+      - name: Build release binary
+        run: |
+          cd screenpipe
+          cargo build
+
+      - name: Upload Windows binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: screenpipe-windows
+          path: screenpipe/target/debug/screenpipe.exe
