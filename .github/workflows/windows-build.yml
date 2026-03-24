@@ -3,7 +3,7 @@ name: Build Windows screenpipe Binary
 on:
   workflow_dispatch:  # manual trigger
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build:
