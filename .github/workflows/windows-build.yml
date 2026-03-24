@@ -1,7 +1,7 @@
 name: Build Windows screenpipe Binary
 
 on:
-  workflow_dispatch:       # manual trigger
+  workflow_dispatch:
   push:
     branches: [ main, develop ]
 
@@ -16,33 +16,28 @@ jobs:
       - name: Clone screenpipe repo
         run: git clone https://github.com/screenpipe/screenpipe.git
 
-      - name: Install Rust
+      - name: Install Rust + GNU target
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          targets: x86_64-pc-windows-gnu
           profile: minimal
           override: true
 
-      - name: Cache Cargo
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Setup MSVC environment
+      - name: Install MinGW-w64
         run: |
-          & 'C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat' x64
+          choco install mingw -y
+          refreshenv
+        shell: cmd
 
       - name: Build screenpipe
+        shell: cmd
         run: |
           cd screenpipe
-          cargo build
+          cargo build --target x86_64-pc-windows-gnu
 
       - name: Upload Windows binary
         uses: actions/upload-artifact@v4
         with:
           name: screenpipe-windows
-          path: screenpipe/target/debug/screenpipe.exe
+          path: screenpipe/target/x86_64-pc-windows-gnu/debug/screenpipe.exe
