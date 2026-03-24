@@ -26,6 +26,17 @@ jobs:
           profile: minimal
           override: true
 
+          - name: Install OpenBLAS
+          run: |
+            vcpkg install openblas:x64-windows
+          env:
+            VCPKG_ROOT: C:\vcpkg
+
+      - name: Configure OpenBLAS env
+        run: |
+          echo "INCLUDE=C:\vcpkg\installed\x64-windows\include;%INCLUDE%" >> $env:GITHUB_ENV
+          echo "LIB=C:\vcpkg\installed\x64-windows\lib;%LIB%" >> $env:GITHUB_ENV
+
       # 4. Cache Cargo dependencies
       - name: Cache Cargo
         uses: actions/cache@v3
