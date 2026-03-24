@@ -10,12 +10,15 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      # 1. Checkout your workflow repo
       - name: Checkout workflow repo
         uses: actions/checkout@v3
 
+      # 2. Clone the screenpipe repo
       - name: Clone screenpipe repo
         run: git clone https://github.com/screenpipe/screenpipe.git
 
+      # 3. Install Rust
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
@@ -23,15 +26,7 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Add Windows GNU Rust target
-        run: rustup target add x86_64-pc-windows-gnu
-
-      - name: Install MinGW-w64
-        shell: cmd
-        run: |
-          choco install mingw -y
-          refreshenv
-
+      # 4. Cache Cargo dependencies
       - name: Cache Cargo
         uses: actions/cache@v3
         with:
@@ -41,14 +36,15 @@ jobs:
             screenpipe/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build screenpipe for Windows GNU
-        shell: cmd
+      # 5. Build screenpipe (MSVC target by default)
+      - name: Build screenpipe for Windows
         run: |
           cd screenpipe
-          cargo build --target x86_64-pc-windows-gnu
+          cargo build
 
+      # 6. Upload built Windows binary
       - name: Upload Windows binary
         uses: actions/upload-artifact@v4
         with:
           name: screenpipe-windows
-          path: screenpipe/target/x86_64-pc-windows-gnu/debug/screenpipe.exe
+          path: screenpipe/target/debug/screenpipe.exe
