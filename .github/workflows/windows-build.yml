@@ -29,7 +29,7 @@ jobs:
           cargo build
 
       - name: Upload Windows binary
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: screenpipe-windows
           path: screenpipe/target/debug/screenpipe.exe
