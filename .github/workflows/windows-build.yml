@@ -1,7 +1,7 @@
 name: Build Windows screenpipe Binary
 
 on:
-  workflow_dispatch:  # manual trigger
+  workflow_dispatch:       # manual trigger
   push:
     branches: [ main, develop ]
 
@@ -23,7 +23,20 @@ jobs:
           profile: minimal
           override: true
 
-      - name: Build release binary
+      - name: Cache Cargo
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Setup MSVC environment
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+
+      - name: Build screenpipe
         run: |
           cd screenpipe
           cargo build
