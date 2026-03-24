@@ -26,11 +26,11 @@ jobs:
           profile: minimal
           override: true
 
-          - name: Install OpenBLAS
-          run: |
-            vcpkg install openblas:x64-windows
-          env:
-            VCPKG_ROOT: C:\vcpkg
+      - name: Install OpenBLAS
+        run: |
+          vcpkg install openblas:x64-windows
+        env:
+          VCPKG_ROOT: C:\vcpkg
 
       - name: Configure OpenBLAS env
         run: |
