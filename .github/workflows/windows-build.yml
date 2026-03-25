@@ -21,17 +21,19 @@ jobs:
       # 3. Install Rust
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: stable
 
-      # 4. Setup vcpkg (no packages yet, just prepare)
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
+      # 4. Install vcpkg manually (simpler, avoids lukka issues)
+      - name: Install vcpkg
+        shell: pwsh
+        run: |
+          git clone https://github.com/Microsoft/vcpkg.git ${{ runner.workspace }}/vcpkg
+          cd ${{ runner.workspace }}/vcpkg
+          .\bootstrap-vcpkg.bat
+          .\vcpkg integrate install
 
       # 5. Install OpenBLAS via vcpkg
       - name: Install OpenBLAS
+        shell: pwsh
         run: |
           cd ${{ runner.workspace }}/vcpkg
           .\vcpkg install openblas:x64-windows
@@ -52,12 +54,15 @@ jobs:
       - name: Cache vcpkg
         uses: actions/cache@v4
         with:
-          path: ${{ runner.workspace }}/vcpkg/installed
-          key: vcpkg-${{ hashFiles('screenpipe/**/vcpkg.json') }}-${{ hashFiles('**/vcpkg.json') }}
+          path: |
+            ${{ runner.workspace }}/vcpkg/installed
+            ${{ runner.workspace }}/vcpkg/downloads
+            ${{ runner.workspace }}/vcpkg/buildtrees
+          key: vcpkg-openblas-x64-windows-${{ hashFiles('**/vcpkg.json') }}
           restore-keys: |
-            vcpkg-
+            vcpkg-openblas-x64-windows-
 
-      # 8. MSVC Developer Command Prompt (ensures env vars)
+      # 8. MSVC Developer Command Prompt
       - name: MSVC Developer Command Prompt
         uses: ilammy/msvc-dev-cmd@v1
 
@@ -66,13 +71,13 @@ jobs:
         shell: pwsh
         run: |
           $vcpkgRoot = "${{ runner.workspace }}/vcpkg"
-          Write-Output "VCPKG_ROOT=$vcpkgRoot" >> $env:GITHUB_ENV
-          Write-Output "VCPKGRS_DYNAMIC=1" >> $env:GITHUB_ENV
-          Write-Output "INCLUDE=$($vcpkgRoot)/installed/x64-windows/include;%INCLUDE%" >> $env:GITHUB_ENV
-          Write-Output "LIB=$($vcpkgRoot)/installed/x64-windows/lib;%LIB%" >> $env:GITHUB_ENV
-          Write-Output "OPENBLAS_DIR=$($vcpkgRoot)/installed/x64-windows" >> $env:GITHUB_ENV
+          echo "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "VCPKGRS_DYNAMIC=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "INCLUDE=$($vcpkgRoot)/installed/x64-windows/include;%INCLUDE%" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "LIB=$($vcpkgRoot)/installed/x64-windows/lib;%LIB%" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          echo "OPENBLAS_DIR=$($vcpkgRoot)/installed/x64-windows" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-      # 10. Build screenpipe (MSVC target by default)
+      # 10. Build screenpipe
       - name: Build screenpipe for Windows
         run: |
           cd screenpipe
