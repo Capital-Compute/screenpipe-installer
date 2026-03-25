@@ -97,3 +97,7 @@ jobs:
           cargo build --release
 
       - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenpipe-windows.exe
+          path: screenpipe/target/release/screenpipe.exe
