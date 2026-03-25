@@ -12,50 +12,78 @@ jobs:
     steps:
       # 1. Checkout your workflow repo
       - name: Checkout workflow repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Clone the screenpipe repo
       - name: Clone screenpipe repo
-        run: git clone https://github.com/screenpipe/screenpipe.git
+        run: git clone https://github.com/mediar-ai/screenpipe.git
 
       # 3. Install Rust
       - name: Install Rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          profile: minimal
-          override: true
 
+      # 4. Setup vcpkg (no packages yet, just prepare)
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: '${{ runner.workspace }}/vcpkg'
+
+      # 5. Install OpenBLAS via vcpkg
       - name: Install OpenBLAS
         run: |
-          vcpkg install openblas:x64-windows
+          cd ${{ runner.workspace }}/vcpkg
+          .\vcpkg install openblas:x64-windows
         env:
-          VCPKG_ROOT: C:\vcpkg
+          VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
 
-      - name: Configure OpenBLAS env
-        run: |
-          echo "INCLUDE=C:\vcpkg\installed\x64-windows\include;%INCLUDE%" >> $env:GITHUB_ENV
-          echo "LIB=C:\vcpkg\installed\x64-windows\lib;%LIB%" >> $env:GITHUB_ENV
-
-      # 4. Cache Cargo dependencies
+      # 6. Cache Cargo dependencies
       - name: Cache Cargo
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
             screenpipe/target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('screenpipe/**/Cargo.lock') }}
 
-      # 5. Build screenpipe (MSVC target by default)
+      # 7. Cache vcpkg installs
+      - name: Cache vcpkg
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.workspace }}/vcpkg/installed
+          key: vcpkg-${{ hashFiles('screenpipe/**/vcpkg.json') }}-${{ hashFiles('**/vcpkg.json') }}
+          restore-keys: |
+            vcpkg-
+
+      # 8. MSVC Developer Command Prompt (ensures env vars)
+      - name: MSVC Developer Command Prompt
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # 9. Set vcpkg environment variables
+      - name: Set vcpkg env vars
+        shell: pwsh
+        run: |
+          $vcpkgRoot = "${{ runner.workspace }}/vcpkg"
+          Write-Output "VCPKG_ROOT=$vcpkgRoot" >> $env:GITHUB_ENV
+          Write-Output "VCPKGRS_DYNAMIC=1" >> $env:GITHUB_ENV
+          Write-Output "INCLUDE=$($vcpkgRoot)/installed/x64-windows/include;%INCLUDE%" >> $env:GITHUB_ENV
+          Write-Output "LIB=$($vcpkgRoot)/installed/x64-windows/lib;%LIB%" >> $env:GITHUB_ENV
+          Write-Output "OPENBLAS_DIR=$($vcpkgRoot)/installed/x64-windows" >> $env:GITHUB_ENV
+
+      # 10. Build screenpipe (MSVC target by default)
       - name: Build screenpipe for Windows
         run: |
           cd screenpipe
-          cargo build
+          cargo build --release
+        env:
+          VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
+          RUSTFLAGS: "-C link-arg=/LIBPATH:${{ runner.workspace }}/vcpkg/installed/x64-windows/lib"
 
-      # 6. Upload built Windows binary
+      # 11. Upload built Windows binary
       - name: Upload Windows binary
         uses: actions/upload-artifact@v4
         with:
           name: screenpipe-windows
-          path: screenpipe/target/debug/screenpipe.exe
+          path: screenpipe/target/release/screenpipe.exe
