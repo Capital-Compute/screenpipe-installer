@@ -63,22 +63,30 @@ jobs:
       - name: Append vcpkg OpenBLAS paths
         shell: cmd
         run: |
-          set VCPKG_ROOT=%CD%\..\vcpkg
+          set VCPKG_ROOT=${{ runner.workspace }}\vcpkg
           set VCPKG_INCLUDE=%VCPKG_ROOT%\installed\x64-windows\include
+          set VCPKG_OPENBLAS_INCLUDE=%VCPKG_INCLUDE%\openblas
           set VCPKG_LIB=%VCPKG_ROOT%\installed\x64-windows\lib
           
-          REM Verify vcpkg files exist
-          if not exist "%VCPKG_INCLUDE%\cblas.h" (echo cblas.h missing && exit 1)
+          REM Verify vcpkg files exist (header may be in include\ or include\openblas\)
+          if exist "%VCPKG_INCLUDE%\cblas.h" (
+            set CBLAS_INCLUDE=%VCPKG_INCLUDE%
+          ) else if exist "%VCPKG_OPENBLAS_INCLUDE%\cblas.h" (
+            set CBLAS_INCLUDE=%VCPKG_OPENBLAS_INCLUDE%
+          ) else (
+            echo cblas.h missing && exit 1
+          )
           if not exist "%VCPKG_LIB%\openblas.lib" (echo openblas.lib missing && exit 1)
           
           REM Append to existing MSVC paths
           call set "OLD_INCLUDE=%%INCLUDE%%"
           call set "OLD_LIB=%%LIB%%"
-          set INCLUDE=%VCPKG_INCLUDE%;%OLD_INCLUDE%
+          set INCLUDE=%VCPKG_INCLUDE%;%CBLAS_INCLUDE%;%OLD_INCLUDE%
           set LIB=%VCPKG_LIB%;%OLD_LIB%
           
           echo INCLUDE=%INCLUDE% >> %GITHUB_ENV%
           echo LIB=%LIB% >> %GITHUB_ENV%
+          echo CBLAS_INCLUDE=%CBLAS_INCLUDE% >> %GITHUB_ENV%
           echo VCPKG_ROOT=%VCPKG_ROOT% >> %GITHUB_ENV%
 
       - name: Debug final environment
@@ -86,9 +94,10 @@ jobs:
         run: |
           echo LIB=%%LIB%%
           echo INCLUDE=%%INCLUDE%%
+          echo CBLAS_INCLUDE=%%CBLAS_INCLUDE%%
           echo.
           dir "%LIB:\kernel32.lib=%\kernel32.lib" 2>nul && echo kernel32.lib: OK || echo kernel32.lib: FAIL
-          dir "%INCLUDE:\cblas.h=%\cblas.h" 2>nul && echo cblas.h: OK || echo cblas.h: FAIL
+          dir "%CBLAS_INCLUDE%\cblas.h" 2>nul && echo cblas.h: OK || echo cblas.h: FAIL
 
       - name: Build screenpipe
         shell: cmd
