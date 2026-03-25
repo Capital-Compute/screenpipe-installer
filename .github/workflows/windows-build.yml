@@ -10,28 +10,22 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # 1. Checkout your workflow repo
       - name: Checkout workflow repo
         uses: actions/checkout@v4
 
-      # 2. Clone the screenpipe repo
       - name: Clone screenpipe repo
         run: git clone https://github.com/mediar-ai/screenpipe.git
 
-      # 3. Install Rust
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      # 4. Install vcpkg manually (simpler, avoids lukka issues)
       - name: Install vcpkg
         shell: pwsh
         run: |
           git clone https://github.com/Microsoft/vcpkg.git ${{ runner.workspace }}/vcpkg
           cd ${{ runner.workspace }}/vcpkg
           .\\bootstrap-vcpkg.bat
-          .\\vcpkg integrate install
 
-      # 5. Install OpenBLAS via vcpkg
       - name: Install OpenBLAS
         shell: pwsh
         run: |
@@ -40,7 +34,6 @@ jobs:
         env:
           VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
 
-      # 6. Cache Cargo dependencies
       - name: Cache Cargo
         uses: actions/cache@v4
         with:
@@ -50,7 +43,6 @@ jobs:
             screenpipe/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('screenpipe/**/Cargo.lock') }}
 
-      # 7. Cache vcpkg installs
       - name: Cache vcpkg
         uses: actions/cache@v4
         with:
@@ -58,63 +50,50 @@ jobs:
             ${{ runner.workspace }}/vcpkg/installed
             ${{ runner.workspace }}/vcpkg/downloads
             ${{ runner.workspace }}/vcpkg/buildtrees
-          key: vcpkg-openblas-x64-windows-${{ hashFiles('screenpipe/Cargo.lock') }}
-          restore-keys: |
-            vcpkg-openblas-x64-windows-
+          key: vcpkg-openblas-x64-windows-v2
 
-      # 8. MSVC Developer Command Prompt (sets SDK + MSVC paths FIRST)
-      - name: MSVC Developer Command Prompt
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      # 9. Append vcpkg to MSVC environment (CRITICAL: preserves SDK paths)
-      - name: Append vcpkg to MSVC env
-        shell: pwsh
+      # FIXED: Manual MSVC + vcpkg setup
+      - name: Setup MSVC Developer Command Prompt
+        shell: cmd
         run: |
-          $vcpkgRoot = "${{ runner.workspace }}/vcpkg/installed/x64-windows"
-          $vcpkgInclude = "$vcpkgRoot/include"
-          $vcpkgLib = "$vcpkgRoot/lib"
-          
-          # Read current MSVC/SDK paths (set by msvc-dev-cmd)
-          $include = [Environment]::GetEnvironmentVariable("INCLUDE", "Process")
-          $lib = [Environment]::GetEnvironmentVariable("LIB", "Process")
-          
-          # Append vcpkg paths FIRST (headers/libs found in order)
-          $newInclude = "$vcpkgInclude;$include"
-          $newLib = "$vcpkgLib;$lib"
-          
-          echo "INCLUDE=$newInclude" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "LIB=$newLib" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "VCPKG_ROOT=${{ runner.workspace }}/vcpkg" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "VCPKGRS_DYNAMIC=1" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          
-          # Debug output
-          Write-Output "::debug::Final INCLUDE preview: $newInclude"
-          Write-Output "::debug::Final LIB preview: $newLib"
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
+          echo LIB=%%LIB%% >> %GITHUB_ENV%
+          echo INCLUDE=%%INCLUDE%% >> %GITHUB_ENV%
 
-      # 10. Debug environment (confirms kernel32.lib + cblas.h available)
-      - name: Debug environment
+      - name: Append vcpkg OpenBLAS paths
+        shell: cmd
+        run: |
+          set VCPKG_ROOT=%CD%\..\vcpkg
+          set VCPKG_INCLUDE=%VCPKG_ROOT%\installed\x64-windows\include
+          set VCPKG_LIB=%VCPKG_ROOT%\installed\x64-windows\lib
+          
+          REM Verify vcpkg files exist
+          if not exist "%VCPKG_INCLUDE%\cblas.h" (echo cblas.h missing && exit 1)
+          if not exist "%VCPKG_LIB%\openblas.lib" (echo openblas.lib missing && exit 1)
+          
+          REM Append to existing MSVC paths
+          call set "OLD_INCLUDE=%%INCLUDE%%"
+          call set "OLD_LIB=%%LIB%%"
+          set INCLUDE=%VCPKG_INCLUDE%;%OLD_INCLUDE%
+          set LIB=%VCPKG_LIB%;%OLD_LIB%
+          
+          echo INCLUDE=%INCLUDE% >> %GITHUB_ENV%
+          echo LIB=%LIB% >> %GITHUB_ENV%
+          echo VCPKG_ROOT=%VCPKG_ROOT% >> %GITHUB_ENV%
+
+      - name: Debug final environment
         shell: cmd
         run: |
           echo LIB=%%LIB%%
           echo INCLUDE=%%INCLUDE%%
-          where cl.exe
-          where link.exe
-          dir "%LIB:\kernel32.lib=%\kernel32.lib" 2>nul && echo kernel32.lib: FOUND || echo kernel32.lib: MISSING
-          dir "%INCLUDE:\cblas.h=%\cblas.h" 2>nul && echo cblas.h: FOUND || echo cblas.h: MISSING
+          echo.
+          dir "%LIB:\kernel32.lib=%\kernel32.lib" 2>nul && echo kernel32.lib: OK || echo kernel32.lib: FAIL
+          dir "%INCLUDE:\cblas.h=%\cblas.h" 2>nul && echo cblas.h: OK || echo cblas.h: FAIL
 
-      # 11. Build screenpipe (vcpkg auto-discovered via VCPKGRS_DYNAMIC)
-      - name: Build screenpipe for Windows
+      - name: Build screenpipe
+        shell: cmd
         run: |
           cd screenpipe
           cargo build --release
-        env:
-          VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
 
-      # 12. Upload built Windows binary
-      - name: Upload Windows binary
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenpipe-windows
-          path: screenpipe/target/release/screenpipe.exe
+      - name: Upload binary
