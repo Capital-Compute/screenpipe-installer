@@ -136,10 +136,10 @@ jobs:
         shell: cmd
         run: |
           cd screenpipe
-          cargo build --release
+          cargo build
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: screenpipe-windows.exe
-          path: screenpipe/target/release/screenpipe.exe
+          path: screenpipe/target/debug/screenpipe.exe
