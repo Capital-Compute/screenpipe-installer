@@ -138,8 +138,19 @@ jobs:
           cd screenpipe
           cargo build
 
+      - name: Bundle OpenBLAS runtime DLL
+        shell: cmd
+        run: |
+          set "VCPKG_ROOT=${{ runner.workspace }}\vcpkg"
+          set "DLL_SRC=%VCPKG_ROOT%\installed\x64-windows\bin\openblas.dll"
+          set "DLL_DST=screenpipe\target\debug\openblas.dll"
+          if not exist "%DLL_SRC%" (echo openblas.dll missing at %DLL_SRC% && exit 1)
+          copy /Y "%DLL_SRC%" "%DLL_DST%"
+
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
-          name: screenpipe-windows.exe
-          path: screenpipe/target/debug/screenpipe.exe
+          name: screenpipe-windows
+          path: |
+            screenpipe/target/debug/screenpipe.exe
+            screenpipe/target/debug/openblas.dll
