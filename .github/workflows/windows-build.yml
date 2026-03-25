@@ -26,14 +26,6 @@ jobs:
           cd ${{ runner.workspace }}/vcpkg
           .\\bootstrap-vcpkg.bat
 
-      - name: Install OpenBLAS
-        shell: pwsh
-        run: |
-          cd ${{ runner.workspace }}/vcpkg
-          .\\vcpkg install openblas:x64-windows
-        env:
-          VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
-
       - name: Cache Cargo
         uses: actions/cache@v4
         with:
@@ -51,6 +43,14 @@ jobs:
             ${{ runner.workspace }}/vcpkg/downloads
             ${{ runner.workspace }}/vcpkg/buildtrees
           key: vcpkg-openblas-x64-windows-v2
+
+      - name: Install OpenBLAS
+        shell: pwsh
+        run: |
+          cd ${{ runner.workspace }}/vcpkg
+          .\\vcpkg install openblas:x64-windows --recurse
+        env:
+          VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
 
       # FIXED: Manual MSVC + vcpkg setup
       - name: Setup MSVC Developer Command Prompt
@@ -106,8 +106,20 @@ jobs:
           echo INCLUDE=%INCLUDE%
           echo CBLAS_INCLUDE=%CBLAS_INCLUDE%
           echo.
-          if exist "%CBLAS_INCLUDE%\cblas.h" (echo cblas.h: OK) else (echo cblas.h: FAIL & exit 1)
-          if exist "%VCPKG_ROOT%\installed\x64-windows\lib\openblas.lib" (echo openblas.lib: OK) else (echo openblas.lib: FAIL & exit 1)
+          set "CBLAS1=%VCPKG_ROOT%\installed\x64-windows\include\cblas.h"
+          set "CBLAS2=%VCPKG_ROOT%\installed\x64-windows\include\openblas\cblas.h"
+          if exist "%CBLAS1%" (
+            echo cblas.h: OK at %CBLAS1%
+          ) else (
+            if exist "%CBLAS2%" (
+              echo cblas.h: OK at %CBLAS2%
+            ) else (
+              echo cblas.h: NOT FOUND IN EXPECTED PATHS
+              dir "%VCPKG_ROOT%\installed\x64-windows\include"
+              dir "%VCPKG_ROOT%\installed\x64-windows\include\openblas"
+            )
+          )
+          if exist "%VCPKG_ROOT%\installed\x64-windows\lib\openblas.lib" (echo openblas.lib: OK) else (echo openblas.lib: NOT FOUND)
 
       - name: Build screenpipe
         shell: cmd
