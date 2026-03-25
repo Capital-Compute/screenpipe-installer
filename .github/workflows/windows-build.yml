@@ -56,33 +56,43 @@ jobs:
       - name: Setup MSVC Developer Command Prompt
         shell: cmd
         run: |
-          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64
-          echo LIB=%%LIB%% >> %GITHUB_ENV%
-          echo INCLUDE=%%INCLUDE%% >> %GITHUB_ENV%
+          set "VCARS="
+          if exist "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" set "VCARS=C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
+          if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat" set "VCARS=C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvarsall.bat"
+          if exist "C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat" set "VCARS=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvarsall.bat"
+          if exist "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" set "VCARS=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+          if "%VCARS%"=="" (echo vcvarsall.bat not found && exit 1)
+          call "%VCARS%" x64
+          if "%LIB%"=="" (echo MSVC LIB not set && exit 1)
+          if "%INCLUDE%"=="" (echo MSVC INCLUDE not set && exit 1)
+          echo LIB=%LIB% >> %GITHUB_ENV%
+          echo INCLUDE=%INCLUDE% >> %GITHUB_ENV%
 
       - name: Append vcpkg OpenBLAS paths
         shell: cmd
         run: |
-          set VCPKG_ROOT=${{ runner.workspace }}\vcpkg
-          set VCPKG_INCLUDE=%VCPKG_ROOT%\installed\x64-windows\include
-          set VCPKG_OPENBLAS_INCLUDE=%VCPKG_INCLUDE%\openblas
-          set VCPKG_LIB=%VCPKG_ROOT%\installed\x64-windows\lib
+          set "VCPKG_ROOT=${{ runner.workspace }}\vcpkg"
+          set "VCPKG_INCLUDE=%VCPKG_ROOT%\installed\x64-windows\include"
+          set "VCPKG_OPENBLAS_INCLUDE=%VCPKG_INCLUDE%\openblas"
+          set "VCPKG_LIB=%VCPKG_ROOT%\installed\x64-windows\lib"
           
           REM Verify vcpkg files exist (header may be in include\ or include\openblas\)
           if exist "%VCPKG_INCLUDE%\cblas.h" (
-            set CBLAS_INCLUDE=%VCPKG_INCLUDE%
-          ) else if exist "%VCPKG_OPENBLAS_INCLUDE%\cblas.h" (
-            set CBLAS_INCLUDE=%VCPKG_OPENBLAS_INCLUDE%
+            set "CBLAS_INCLUDE=%VCPKG_INCLUDE%"
           ) else (
-            echo cblas.h missing && exit 1
+            if exist "%VCPKG_OPENBLAS_INCLUDE%\cblas.h" (
+              set "CBLAS_INCLUDE=%VCPKG_OPENBLAS_INCLUDE%"
+            ) else (
+              echo cblas.h missing && exit 1
+            )
           )
           if not exist "%VCPKG_LIB%\openblas.lib" (echo openblas.lib missing && exit 1)
           
           REM Append to existing MSVC paths
-          call set "OLD_INCLUDE=%%INCLUDE%%"
-          call set "OLD_LIB=%%LIB%%"
-          set INCLUDE=%VCPKG_INCLUDE%;%CBLAS_INCLUDE%;%OLD_INCLUDE%
-          set LIB=%VCPKG_LIB%;%OLD_LIB%
+          set "OLD_INCLUDE=%INCLUDE%"
+          set "OLD_LIB=%LIB%"
+          set "INCLUDE=%VCPKG_INCLUDE%;%CBLAS_INCLUDE%;%OLD_INCLUDE%"
+          set "LIB=%VCPKG_LIB%;%OLD_LIB%"
           
           echo INCLUDE=%INCLUDE% >> %GITHUB_ENV%
           echo LIB=%LIB% >> %GITHUB_ENV%
@@ -92,12 +102,12 @@ jobs:
       - name: Debug final environment
         shell: cmd
         run: |
-          echo LIB=%%LIB%%
-          echo INCLUDE=%%INCLUDE%%
-          echo CBLAS_INCLUDE=%%CBLAS_INCLUDE%%
+          echo LIB=%LIB%
+          echo INCLUDE=%INCLUDE%
+          echo CBLAS_INCLUDE=%CBLAS_INCLUDE%
           echo.
-          dir "%LIB:\kernel32.lib=%\kernel32.lib" 2>nul && echo kernel32.lib: OK || echo kernel32.lib: FAIL
-          dir "%CBLAS_INCLUDE%\cblas.h" 2>nul && echo cblas.h: OK || echo cblas.h: FAIL
+          if exist "%CBLAS_INCLUDE%\cblas.h" (echo cblas.h: OK) else (echo cblas.h: FAIL & exit 1)
+          if exist "%VCPKG_ROOT%\installed\x64-windows\lib\openblas.lib" (echo openblas.lib: OK) else (echo openblas.lib: FAIL & exit 1)
 
       - name: Build screenpipe
         shell: cmd
