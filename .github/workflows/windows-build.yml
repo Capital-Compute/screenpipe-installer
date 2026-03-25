@@ -42,13 +42,34 @@ jobs:
             ${{ runner.workspace }}/vcpkg/installed
             ${{ runner.workspace }}/vcpkg/downloads
             ${{ runner.workspace }}/vcpkg/buildtrees
-          key: vcpkg-openblas-x64-windows-v2
+          key: vcpkg-openblas-x64-windows-v3
 
       - name: Install OpenBLAS
         shell: pwsh
         run: |
           cd ${{ runner.workspace }}/vcpkg
           .\\vcpkg install openblas:x64-windows --recurse
+          .\\vcpkg list
+
+          $includeRoot = "${{ runner.workspace }}\vcpkg\installed\x64-windows\include"
+          $libRoot = "${{ runner.workspace }}\vcpkg\installed\x64-windows\lib"
+          $cblas1 = Join-Path $includeRoot "cblas.h"
+          $cblas2 = Join-Path $includeRoot "openblas\cblas.h"
+          $openblasLib = Join-Path $libRoot "openblas.lib"
+
+          if (-not (Test-Path $includeRoot)) { throw "vcpkg include dir missing: $includeRoot" }
+          if (-not (Test-Path $libRoot)) { throw "vcpkg lib dir missing: $libRoot" }
+          if ((-not (Test-Path $cblas1)) -and (-not (Test-Path $cblas2))) {
+            Get-ChildItem $includeRoot -ErrorAction SilentlyContinue | Select-Object -First 200
+            if (Test-Path (Join-Path $includeRoot "openblas")) {
+              Get-ChildItem (Join-Path $includeRoot "openblas") -ErrorAction SilentlyContinue | Select-Object -First 200
+            }
+            throw "cblas.h missing after vcpkg install"
+          }
+          if (-not (Test-Path $openblasLib)) {
+            Get-ChildItem $libRoot -ErrorAction SilentlyContinue | Select-Object -First 200
+            throw "openblas.lib missing after vcpkg install"
+          }
         env:
           VCPKG_ROOT: ${{ runner.workspace }}/vcpkg
 
@@ -105,21 +126,6 @@ jobs:
           echo LIB=%LIB%
           echo INCLUDE=%INCLUDE%
           echo CBLAS_INCLUDE=%CBLAS_INCLUDE%
-          echo.
-          set "CBLAS1=%VCPKG_ROOT%\installed\x64-windows\include\cblas.h"
-          set "CBLAS2=%VCPKG_ROOT%\installed\x64-windows\include\openblas\cblas.h"
-          if exist "%CBLAS1%" (
-            echo cblas.h: OK at %CBLAS1%
-          ) else (
-            if exist "%CBLAS2%" (
-              echo cblas.h: OK at %CBLAS2%
-            ) else (
-              echo cblas.h: NOT FOUND IN EXPECTED PATHS
-              dir "%VCPKG_ROOT%\installed\x64-windows\include"
-              dir "%VCPKG_ROOT%\installed\x64-windows\include\openblas"
-            )
-          )
-          if exist "%VCPKG_ROOT%\installed\x64-windows\lib\openblas.lib" (echo openblas.lib: OK) else (echo openblas.lib: NOT FOUND)
 
       - name: Build screenpipe
         shell: cmd
