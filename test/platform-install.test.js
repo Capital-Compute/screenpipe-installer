@@ -62,9 +62,11 @@ function buildZipArchive() {
     var contentsDir = path.join(tempDir, 'contents', 'nested');
     var archivePath = path.join(tempDir, 'screenpipe.zip');
     var binaryPath = path.join(contentsDir, 'screenpipe.exe');
+    var dllPath = path.join(contentsDir, 'openblas.dll');
 
     fs.mkdirSync(contentsDir, { recursive: true });
     fs.writeFileSync(binaryPath, 'screenpipe.exe');
+    fs.writeFileSync(dllPath, 'openblas.dll');
     childProcess.execFileSync('zip', ['-qr', archivePath, '.'], { cwd: path.join(tempDir, 'contents') });
 
     return {
@@ -144,7 +146,7 @@ test('darwin installer downloads, verifies, extracts and installs a tar.gz binar
     }
 });
 
-test('win32 installer downloads, verifies, extracts and installs a zip binary', async function () {
+test('win32 installer downloads, verifies, extracts and installs a zip binary with companion files', async function () {
     var archive = buildZipArchive();
     var packageDir = path.resolve(__dirname, '..', 'packages', 'win32-x64');
     var restoreHttps = patchHttpsGet(archive.archivePath);
@@ -161,7 +163,9 @@ test('win32 installer downloads, verifies, extracts and installs a zip binary', 
             await winInstaller.install();
 
             var binaryPath = path.join(packageDir, 'bin', 'screenpipe.exe');
+            var dllPath = path.join(packageDir, 'bin', 'openblas.dll');
             assert.equal(fs.existsSync(binaryPath), true);
+            assert.equal(fs.existsSync(dllPath), true);
         });
     } finally {
         cleanupInstalledArtifacts(packageDir);

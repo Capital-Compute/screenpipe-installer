@@ -161,6 +161,23 @@ function findFile(rootDir, fileName) {
     return null;
 }
 
+function copyDirectoryContents(sourceDir, destinationDir) {
+    var entries = fs.readdirSync(sourceDir, { withFileTypes: true });
+
+    entries.forEach(function (entry) {
+        var sourcePath = path.join(sourceDir, entry.name);
+        var destinationPath = path.join(destinationDir, entry.name);
+
+        if (entry.isDirectory()) {
+            fs.mkdirSync(destinationPath, { recursive: true });
+            copyDirectoryContents(sourcePath, destinationPath);
+            return;
+        }
+
+        fs.copyFileSync(sourcePath, destinationPath);
+    });
+}
+
 async function install() {
     var metadata = packageJson.screenpipe;
     var tmpDir = path.join(__dirname, '..', '.tmp');
@@ -199,7 +216,7 @@ async function install() {
         throw formatError('binary lookup', metadata.url, new Error('Executable "' + metadata.binaryName + '" was not found in the archive'));
     }
 
-    fs.copyFileSync(discoveredBinary, binaryPath);
+    copyDirectoryContents(path.dirname(discoveredBinary), binDir);
 
     if (!verifyFile(binaryPath)) {
         throw formatError('binary verification', metadata.url, new Error('Executable was not written to "' + binaryPath + '"'));
@@ -213,6 +230,7 @@ async function install() {
 }
 
 module.exports = {
+    copyDirectoryContents: copyDirectoryContents,
     downloadToFile: downloadToFile,
     extractArchive: extractArchive,
     findFile: findFile,
