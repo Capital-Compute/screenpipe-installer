@@ -4,7 +4,7 @@ Platform independent binary installer for Screenpipe. It mirrors the `@ffmpeg-in
 
 This package installs binaries built and hosted by this project for the Screenpipe application:
 
-- https://github.com/screenpipe/screenpipe
+- https://github.com/Capital-Compute/screenpipe
 
 ## Install
 
@@ -50,9 +50,9 @@ const screenpipePath = require("@screenpipe-installer/screenpipe").path.replace(
 
 ## Credit
 
-Credit for the Screenpipe application itself goes to the upstream Screenpipe project and maintainers:
+Credit for the Screenpipe application itself goes to the Screenpipe project and the fork used by this installer:
 
-- https://github.com/screenpipe/screenpipe
+- https://github.com/Capital-Compute/screenpipe
 
 The binaries referenced by this installer are built and hosted by this project.
 

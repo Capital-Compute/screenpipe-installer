@@ -8,4 +8,4 @@ This package ships binaries built and hosted by this project for the Screenpipe 
 
 Upstream Screenpipe project:
 
-- https://github.com/screenpipe/screenpipe
+- https://github.com/Capital-Compute/screenpipe

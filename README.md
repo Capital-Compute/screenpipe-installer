@@ -1,6 +1,6 @@
 # `@screenpipe-installer`
 
-Installer packages for shipping precompiled [Screenpipe](https://github.com/screenpipe/screenpipe) binaries into Node.js and Electron apps.
+Installer packages for shipping precompiled [Screenpipe](https://github.com/Capital-Compute/screenpipe) binaries into Node.js and Electron apps.
 
 This repo is not Screenpipe itself. It is a packaging layer that:
 
@@ -8,9 +8,9 @@ This repo is not Screenpipe itself. It is a packaging layer that:
 - exposes a stable `require('@screenpipe-installer/screenpipe')` API
 - keeps platform-specific download metadata in one config file
 
-Credit for the Screenpipe software and upstream project goes to the Screenpipe team and the upstream GitHub repository:
+Credit for the Screenpipe software and fork used by this installer goes to the Screenpipe project and your fork repository:
 
-- https://github.com/screenpipe/screenpipe
+- https://github.com/Capital-Compute/screenpipe
 
 The binaries referenced by this installer are built and hosted by this project, not pulled from upstream release artifacts.
 
@@ -119,6 +119,6 @@ const screenpipePath = require("@screenpipe-installer/screenpipe").path.replace(
 
 This packaging repo is MIT licensed. See `LICENSE`.
 
-Screenpipe itself is a separate upstream project with its own repository and licensing. This repo only provides packaging, metadata, and installer logic for binaries built and hosted by this project:
+Screenpipe itself is a separate project with its own repository and licensing. This repo only provides packaging, metadata, and installer logic for binaries built and hosted by this project:
 
-- https://github.com/screenpipe/screenpipe
+- https://github.com/Capital-Compute/screenpipe
