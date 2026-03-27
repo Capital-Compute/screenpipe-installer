@@ -1,6 +1,6 @@
 {
   "name": "@screenpipe-installer/screenpipe",
-  "version": "1.1.1",
+  "version": "1.0.0",
   "description": "Platform independent binary installer for Screenpipe.",
   "main": "index.js",
   "types": "types/index.d.ts",

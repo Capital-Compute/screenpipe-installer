@@ -1,6 +1,6 @@
 {
   "name": "@screenpipe-installer/darwin-arm64",
-  "version": "2.2.228",
+  "version": "1.0.0",
   "description": "macOS arm64 Screenpipe binary installer.",
   "main": "index.js",
   "files": [

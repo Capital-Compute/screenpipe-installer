@@ -1,6 +1,6 @@
 {
   "name": "screenpipe-installer-workspace",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "private": true,
   "description": "Workspace for the @screenpipe-installer npm package family.",
   "workspaces": [
