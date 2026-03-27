@@ -1,6 +1,6 @@
 {
   "name": "@screenpipe-installer/screenpipe",
-  "version": "2.2.228",
+  "version": "1.1.0",
   "description": "Platform independent binary installer for Screenpipe.",
   "main": "index.js",
   "types": "types/index.d.ts",
@@ -12,7 +12,7 @@
   ],
   "optionalDependencies": {
     "@screenpipe-installer/darwin-arm64": "2.2.228",
-    "@screenpipe-installer/win32-x64": "2.2.228"
+    "@screenpipe-installer/win32-x64": "0.3.232"
   },
   "keywords": [
     "screenpipe",

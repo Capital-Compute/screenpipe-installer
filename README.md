@@ -31,15 +31,16 @@ Update that file before publishing:
 
 ```json
 {
-  "version": "<screenpipe-release-version>",
   "platforms": {
     "darwin-arm64": {
+      "version": "<darwin-arm64-package-version>",
       "url": "<darwin-arm64-binary-url>",
       "sha256": "<sha256>",
       "archiveType": "tar.gz",
       "binaryName": "screenpipe"
     },
     "win32-x64": {
+      "version": "<win32-x64-package-version>",
       "url": "<win32-x64-binary-url>",
       "sha256": "<sha256>",
       "archiveType": "zip",
@@ -53,6 +54,12 @@ Then sync the package manifests:
 
 ```sh
 npm run sync-platform-metadata
+```
+
+If you want to bump the top-level `@screenpipe-installer/screenpipe` package version separately, pass it explicitly:
+
+```sh
+npm run sync-platform-metadata -- --version=<meta-package-version>
 ```
 
 Publish order:

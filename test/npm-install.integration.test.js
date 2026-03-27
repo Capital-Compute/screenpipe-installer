@@ -52,9 +52,10 @@ function rewriteMetaPackageForOfflineInstall(workspaceDir, currentPlatform) {
     var metaPackagePath = path.join(workspaceDir, 'packages', 'screenpipe', 'package.json');
     var metaPackageJson = JSON.parse(fs.readFileSync(metaPackagePath, 'utf8'));
     var packageName = '@screenpipe-installer/' + currentPlatform;
+    var platformDependencyVersion = metaPackageJson.optionalDependencies[packageName];
 
     metaPackageJson.optionalDependencies = {};
-    metaPackageJson.optionalDependencies[packageName] = metaPackageJson.version;
+    metaPackageJson.optionalDependencies[packageName] = platformDependencyVersion;
 
     fs.writeFileSync(metaPackagePath, JSON.stringify(metaPackageJson, null, 2) + '\n');
 }
@@ -120,7 +121,7 @@ test('packed installer packages install into a temp consumer project and clean u
         );
         var installed = JSON.parse(output);
 
-        assert.equal(installed.version, config.version);
+        assert.equal(installed.version, config.platforms[currentPlatform].version);
         assert.equal(installed.url, config.platforms[currentPlatform].url);
         assert.equal(
             path.basename(installed.path),

@@ -45,14 +45,14 @@ function loadConfig(configPath) {
 }
 
 function validatePlatformConfig(platformName, platformConfig) {
-    ['url', 'sha256', 'archiveType', 'binaryName'].forEach(function (key) {
+    ['version', 'url', 'sha256', 'archiveType', 'binaryName'].forEach(function (key) {
         if (!platformConfig[key]) {
             throw new Error('Missing "' + key + '" for ' + platformName + ' in config/platforms.json');
         }
     });
 }
 
-function updatePlatformPackage(platformName, packageInfo, platformConfig, version) {
+function updatePlatformPackage(platformName, packageInfo, platformConfig) {
     var packageJson = readJson(packageInfo.packageJsonPath);
 
     validatePlatformConfig(platformName, platformConfig);
@@ -69,8 +69,8 @@ function updatePlatformPackage(platformName, packageInfo, platformConfig, versio
         );
     }
 
-    packageJson.version = version;
-    packageJson.screenpipe.version = version;
+    packageJson.version = platformConfig.version;
+    packageJson.screenpipe.version = platformConfig.version;
     packageJson.screenpipe.url = platformConfig.url;
     packageJson.screenpipe.sha256 = platformConfig.sha256;
     packageJson.screenpipe.archiveType = platformConfig.archiveType;
@@ -78,12 +78,14 @@ function updatePlatformPackage(platformName, packageInfo, platformConfig, versio
     writeJson(packageInfo.packageJsonPath, packageJson);
 }
 
-function updateMetaPackage(version, platformNames) {
+function updateMetaPackage(metaPackageVersion, config, platformNames) {
     var packageJson = readJson(metaPackagePath);
 
-    packageJson.version = version;
+    if (metaPackageVersion) {
+        packageJson.version = metaPackageVersion;
+    }
     platformNames.forEach(function (platformName) {
-        packageJson.optionalDependencies['@screenpipe-installer/' + platformName] = version;
+        packageJson.optionalDependencies['@screenpipe-installer/' + platformName] = config.platforms[platformName].version;
     });
 
     writeJson(metaPackagePath, packageJson);
@@ -92,14 +94,13 @@ function updateMetaPackage(version, platformNames) {
 function main() {
     var args = parseArgs(process.argv.slice(2));
     var config = loadConfig(args.config);
-    var version = args.version || config.version;
     var platformNames = Object.keys(packagePaths);
 
     platformNames.forEach(function (platformName) {
-        updatePlatformPackage(platformName, packagePaths[platformName], config.platforms[platformName] || {}, version);
+        updatePlatformPackage(platformName, packagePaths[platformName], config.platforms[platformName] || {});
     });
 
-    updateMetaPackage(version, platformNames);
+    updateMetaPackage(args.version, config, platformNames);
 }
 
 if (require.main === module) {
