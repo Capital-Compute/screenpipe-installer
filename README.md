@@ -55,14 +55,16 @@ Example shape:
 {
   "platforms": {
     "darwin-arm64": {
-      "version": "<darwin-arm64-package-version>",
+      "packageVersion": "<darwin-arm64-package-version>",
+      "binaryVersion": "<darwin-arm64-binary-version>",
       "url": "<darwin-arm64-binary-url>",
       "sha256": "<sha256>",
       "archiveType": "tar.gz",
       "binaryName": "screenpipe"
     },
     "win32-x64": {
-      "version": "<win32-x64-package-version>",
+      "packageVersion": "<win32-x64-package-version>",
+      "binaryVersion": "<win32-x64-binary-version>",
       "url": "<win32-x64-binary-url>",
       "sha256": "<sha256>",
       "archiveType": "zip",

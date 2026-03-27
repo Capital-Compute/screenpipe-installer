@@ -11,8 +11,8 @@
     "README.md"
   ],
   "optionalDependencies": {
-    "@screenpipe-installer/darwin-arm64": "2.2.228",
-    "@screenpipe-installer/win32-x64": "0.3.232"
+    "@screenpipe-installer/darwin-arm64": "1.0.0",
+    "@screenpipe-installer/win32-x64": "1.0.0"
   },
   "keywords": [
     "screenpipe",

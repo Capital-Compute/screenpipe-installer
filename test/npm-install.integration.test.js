@@ -121,7 +121,7 @@ test('packed installer packages install into a temp consumer project and clean u
         );
         var installed = JSON.parse(output);
 
-        assert.equal(installed.version, config.platforms[currentPlatform].version);
+        assert.equal(installed.version, config.platforms[currentPlatform].binaryVersion);
         assert.equal(installed.url, config.platforms[currentPlatform].url);
         assert.equal(
             path.basename(installed.path),

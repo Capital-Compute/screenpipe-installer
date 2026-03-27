@@ -45,7 +45,7 @@ function loadConfig(configPath) {
 }
 
 function validatePlatformConfig(platformName, platformConfig) {
-    ['version', 'url', 'sha256', 'archiveType', 'binaryName'].forEach(function (key) {
+    ['packageVersion', 'binaryVersion', 'url', 'sha256', 'archiveType', 'binaryName'].forEach(function (key) {
         if (!platformConfig[key]) {
             throw new Error('Missing "' + key + '" for ' + platformName + ' in config/platforms.json');
         }
@@ -69,8 +69,8 @@ function updatePlatformPackage(platformName, packageInfo, platformConfig) {
         );
     }
 
-    packageJson.version = platformConfig.version;
-    packageJson.screenpipe.version = platformConfig.version;
+    packageJson.version = platformConfig.packageVersion;
+    packageJson.screenpipe.version = platformConfig.binaryVersion;
     packageJson.screenpipe.url = platformConfig.url;
     packageJson.screenpipe.sha256 = platformConfig.sha256;
     packageJson.screenpipe.archiveType = platformConfig.archiveType;
@@ -85,7 +85,7 @@ function updateMetaPackage(metaPackageVersion, config, platformNames) {
         packageJson.version = metaPackageVersion;
     }
     platformNames.forEach(function (platformName) {
-        packageJson.optionalDependencies['@screenpipe-installer/' + platformName] = config.platforms[platformName].version;
+        packageJson.optionalDependencies['@screenpipe-installer/' + platformName] = config.platforms[platformName].packageVersion;
     });
 
     writeJson(metaPackagePath, packageJson);
