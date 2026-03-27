@@ -20,7 +20,7 @@
     "binary",
     "electron"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "publishConfig": {
     "access": "public"

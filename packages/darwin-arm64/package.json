@@ -31,7 +31,7 @@
     "darwin",
     "arm64"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "publishConfig": {
     "access": "public"

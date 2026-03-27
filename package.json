@@ -16,6 +16,6 @@
     "installer",
     "electron"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs"
 }

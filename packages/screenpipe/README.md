@@ -2,6 +2,10 @@
 
 Platform independent binary installer for Screenpipe. It mirrors the `@ffmpeg-installer/ffmpeg` API for Electron and Node consumers.
 
+This package installs binaries built and hosted by this project for the Screenpipe application:
+
+- https://github.com/screenpipe/screenpipe
+
 ## Install
 
 ```sh
@@ -11,7 +15,7 @@ npm install @screenpipe-installer/screenpipe
 ## Usage
 
 ```js
-const screenpipe = require('@screenpipe-installer/screenpipe');
+const screenpipe = require("@screenpipe-installer/screenpipe");
 
 console.log(screenpipe.path, screenpipe.version, screenpipe.url);
 ```
@@ -19,11 +23,11 @@ console.log(screenpipe.path, screenpipe.version, screenpipe.url);
 Use it with `spawn`:
 
 ```js
-const spawn = require('child_process').spawn;
-const screenpipePath = require('@screenpipe-installer/screenpipe').path;
+const spawn = require("child_process").spawn;
+const screenpipePath = require("@screenpipe-installer/screenpipe").path;
 
-const child = spawn(screenpipePath, ['--help']);
-child.on('exit', function (code) {
+const child = spawn(screenpipePath, ["--help"]);
+child.on("exit", function (code) {
   console.log(code);
 });
 ```
@@ -33,9 +37,9 @@ child.on('exit', function (code) {
 If your Electron app uses `asar`, you may need to rewrite the path:
 
 ```js
-const screenpipePath = require('@screenpipe-installer/screenpipe').path.replace(
-  'app.asar',
-  'app.asar.unpacked'
+const screenpipePath = require("@screenpipe-installer/screenpipe").path.replace(
+  "app.asar",
+  "app.asar.unpacked",
 );
 ```
 
@@ -43,6 +47,14 @@ const screenpipePath = require('@screenpipe-installer/screenpipe').path.replace(
 
 - macOS arm64
 - Windows x64
+
+## Credit
+
+Credit for the Screenpipe application itself goes to the upstream Screenpipe project and maintainers:
+
+- https://github.com/screenpipe/screenpipe
+
+The binaries referenced by this installer are built and hosted by this project.
 
 ## Troubleshooting
 
